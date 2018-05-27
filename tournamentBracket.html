@@ -1,0 +1,210 @@
+<html>
+
+<body>
+    <style>
+        body {
+            color: #d8d8d8;
+            background-color: #272a33;
+        }
+
+        .btn-primary {
+            color: #fff;
+            background-color: #ff7324;
+            border-color: #ff7324;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 15px;
+            margin-bottom: 0;
+            font-weight: normal;
+            text-align: center;
+            vertical-align: middle;
+            touch-action: manipulation;
+            cursor: pointer;
+            background-image: none;
+            border: 1px solid transparent;
+            white-space: nowrap;
+            padding: 6px 12px;
+            font-size: 14px;
+            line-height: 1.42857143;
+            border-radius: 2px;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .form-control,
+        .form-control[disabled]:hover,
+        .form-control[readonly]:hover {
+            -webkit-appearance: none;
+            border-radius: 2px;
+            border: solid 1px #868fa5;
+            background: #3a404e;
+            min-height: 40px;
+            line-height: 20.00000001px;
+            padding: 10.0px 12px;
+            font-weight: normal;
+            color: #fff;
+            box-shadow: none;
+            width: 100%;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+    </style>
+
+
+
+    <fieldset>
+        <div class='form-group'>
+            <label class="control-label col-sm-4" for="tournament_name">Tournament Name:</label>
+            <div class='col-sm-9'>
+                <input maxlength="60" class="auto-focus form-control" size="60" type="text" id="tournament_name" />
+            </div>
+        </div>
+
+
+
+        <div class='form-group' id='participants_row'>
+            <label class="control-label col-sm-4" for="tournament_participant_emails">Participants / Teams:</label>
+            <div class='col-sm-9'>
+
+                <textarea class="form-control" style="height:200px" id="tournament_participants"></textarea>
+
+            </div>
+        </div>
+
+        <div class='form-group'>
+            <div class='col-sm-offset-4 col-sm-20'>
+                <input type="submit" value="Generate!" class="btn btn-primary -extra-wide" onclick="render()" ; />
+            </div>
+        </div>
+    </fieldset>
+
+    <br />
+    <div id='match'></div>
+</body>
+
+</html>
+
+
+<script>
+
+    var SVG = {
+        createCanvas: function (width, height, containerId) {
+            var container = document.getElementById(containerId);
+            var canvas = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            canvas.setAttribute('width', width);
+            canvas.setAttribute('height', height);
+            canvas.setAttribute('id', 'svgCanvas');
+            container.appendChild(canvas);
+            return canvas;
+        },
+        createLine: function (x1, y1, x2, y2, color, w) {
+            var aLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            aLine.setAttribute('x1', x1);
+            aLine.setAttribute('y1', y1);
+            aLine.setAttribute('x2', x2);
+            aLine.setAttribute('y2', y2);
+            aLine.setAttribute('stroke', color);
+            aLine.setAttribute('stroke-width', w);
+            return aLine;
+        },
+        createText: function (t, x, y, s) {
+            var textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            textElement.setAttribute('x', x);
+            textElement.setAttribute('y', y);
+            textElement.setAttribute('font-size', s);
+            textElement.setAttribute('font-family', 'Verdana');
+            textElement.setAttribute('fill', '#ffffff');
+            textElement.innerHTML = t;
+            textElement.onclick = function () { addWinner(x + 350, y, '', t); };
+            return textElement;
+        },
+        createRect: function (x, y, w, h, f) {
+            var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', x);
+            rect.setAttribute('y', y);
+            rect.setAttribute('width', w);
+            rect.setAttribute('height', h);
+            rect.setAttribute('fill', f);
+            rect.setAttribute('fill-opacity', 0.5);
+            return rect;
+        }
+    };
+
+    function createX(x, y, text, colPos) {
+        var container = document.getElementById('svgCanvas');
+        var numberBox = SVG.createRect(this.x - 40, this.y - 25, 40, boxNameHeight, boxNumberColor);
+        container.appendChild(numberBox);
+
+        var teamBox = SVG.createRect(x - 15, y - 25, boxNameLength, boxNameHeight, boxNameColor);
+        container.appendChild(teamBox);
+        var teamLabel = SVG.createText(t, x + 15, y, fontSize);
+        container.appendChild(teamLabel);
+
+        var n = SVG.createText(/*(i + 1)*/'', x - 30, y, fontSize);
+        container.appendChild(n);
+
+    }
+
+
+
+    var x = 50, y = 50, s = 60, fontSize = 20, boxNameLength = 300, boxNameHeight = 40, boxNameColor = '#58595e', boxNumberColor = '#787a80';
+
+    function render() {
+        var names = document.getElementById('tournament_participants').value.split('\n');
+
+        var container = SVG.createCanvas(5000, 5000, 'match');
+
+        for (var i = 0; i < names.length; i++) {
+            var numberBox = SVG.createRect(x - 40, y - 25, 40, boxNameHeight, boxNumberColor);
+            container.appendChild(numberBox);
+
+            var teamBox = SVG.createRect(x - 15, y - 25, boxNameLength, boxNameHeight, boxNameColor);
+            container.appendChild(teamBox);
+            var teamLabel = SVG.createText(names[i], x + 15, y, fontSize);
+            container.appendChild(teamLabel);
+
+            var n = SVG.createText(/*(i + 1)*/'', x - 30, y, fontSize);
+            container.appendChild(n);
+
+            //     var promote = SVG.createText('->', x + boxNameLength - 50, y, fontSize);
+            //    container.appendChild(promote);
+
+            if ((i + 1) % 2 == 0)
+                y += s + 40;
+            else
+                y += s;
+        }
+    }
+
+    function addWinner(xi, yi, n, text) {
+        var names = document.getElementById('tournament_participants').value.split('\n');
+
+        if ((names.indexOf(text) + 1) % 2 == 0) {
+            yi += -40;
+        } else yi += 40;
+
+
+        var container = document.getElementById('svgCanvas');
+        var numberBox = SVG.createRect(xi - 40, yi - 25, 40, boxNameHeight, boxNumberColor);
+        container.appendChild(numberBox);
+
+        var teamBox = SVG.createRect(xi - 15, yi - 25, boxNameLength, boxNameHeight, boxNameColor);
+        container.appendChild(teamBox);
+        var teamLabel = SVG.createText(text, xi + 15, yi, fontSize);
+        container.appendChild(teamLabel);
+
+        var n = SVG.createText(n, xi - 30, yi, fontSize);
+        container.appendChild(n);
+
+        //    var promote = SVG.createText('->', xi + boxNameLength - 50, yi, fontSize);
+        //  container.appendChild(promote);
+    }
+
+
+
+
+</script>
